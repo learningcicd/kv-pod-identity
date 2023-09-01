@@ -1,0 +1,48 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  #your pod name
+  name: nginx-secrets-store-inline
+spec:
+  containers:
+  - image: nginx
+    name: nginx
+    env:
+    #the env name in the pod, you can add more here
+    - name: FIRST-SECRET
+      valueFrom:
+        secretKeyRef:
+          #the secret created in the SecretProviderClass demo-kv
+          name: demosecret
+          #Corresponds to the in demosecret
+          key: FIRST
+    - name: SECOND-SECRET
+      valueFrom:
+        secretKeyRef:
+          #the secret created in the SecretProviderClass demo-kv
+          name: demosecret
+          #Corresponds to the in demosecret
+          key: SECOND
+
+    - name: THIRD-SECRET
+      valueFrom:
+        secretKeyRef:
+          #the secret created in the SecretProviderClass demo-kv
+          name: demosecret
+          #Corresponds to the in demosecret
+          key: THIRD
+    volumeMounts:
+    - name: secrets-store-inline
+      mountPath: "/mnt/secrets-store"
+      readOnly: true
+  volumes:
+    - name: secrets-store-inline
+      csi:
+        driver: secrets-store.csi.k8s.io
+        readOnly: true
+        volumeAttributes:
+          # the name of custom SecretProviderClass
+          secretProviderClass: "demo-kv"
+        nodePublishSecretRef:
+          # the secret which we create in step 3        
+          name: secrets-store-creds
